@@ -6,6 +6,8 @@ function Start-ChatServer {
         $Port = 8999
     )
 
+    $ErrorActionPreference = "SilentlyContinue"
+
     $Endpoint = new-object System.Net.IPEndPoint ([system.net.ipaddress]::any, $Port)
     $Listener = new-object System.Net.Sockets.TcpListener $Endpoint
     $Listener.start()
@@ -21,7 +23,6 @@ function Start-ChatServer {
             $ClientObj = [PSCustomObject]@{"Client" = $Client; "Stream" = $Stream}
             $ClientList.Add($ClientObj) | Out-Null
             $ClientCallback = $Listener.AcceptTcpClientAsync()
-            Write-Host $ClientObj
         }
 
         $ToRemove = [System.Collections.ArrayList]@()
@@ -59,6 +60,8 @@ function Start-ChatClient {
         [Int64]
         $Port = 8999
     )
+
+    $ErrorActionPreference = "SilentlyContinue"
 
     $Name = Read-Host -Prompt "Nutzername "
     $Name = $Name.Replace('"', '').Replace("'", "")
@@ -121,7 +124,7 @@ function Start-ChatServerBeacon {
             while (-not $AsyncAccept.IsCompleted) {Start-Sleep -Milliseconds 10}
         }
     }
-    Start-Job -ScriptBlock $ScriptBlock -ArgumentList @($Port)
+    Start-Job -ScriptBlock $ScriptBlock -ArgumentList @($Port) | Out-Null
 }
 
 function Get-LocalIP {
