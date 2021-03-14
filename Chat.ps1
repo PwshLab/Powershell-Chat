@@ -61,8 +61,6 @@ function Start-ChatClient {
         $Port = 8999
     )
 
-    $ErrorActionPreference = "SilentlyContinue"
-
     $Name = Read-Host -Prompt "Nutzername "
     $Name = $Name.Replace('"', '').Replace("'", "")
 
