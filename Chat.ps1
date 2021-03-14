@@ -88,8 +88,14 @@ function Start-ChatClient {
             $DataA[0..($Read-1)].CopyTo($DataB, 0)
             if ($DataB.Length -gt 0) {
                 $InMessage = [Text.Encoding]::ASCII.GetString($DataB)
-                $InMessage = $InMessage.Substring(0, [Math]::Min([Console]::BufferWidth, $InMessage.Length))
-                Write-Host $InMessage
+                $InMessageFull += $InMessage
+                $InMessage = $null
+            }
+        } else {
+            if ($InMessageFull.Length -gt 0) {
+                $InMessageFull = $InMessageFull.Substring(0, [Math]::Min([Console]::BufferWidth, $InMessageFull.Length))
+                Write-Host $InMessageFull
+                $InMessageFull = $null
             }
         }
         if (Test-Path $FilePath -ErrorAction SilentlyContinue) {
