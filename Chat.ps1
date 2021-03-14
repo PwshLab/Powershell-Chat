@@ -108,7 +108,7 @@ function Start-ChatClient {
             $Stream.Write($Data, 0, $Data.Length)
         }
         if (-not (Get-Process -Id $ID -ErrorAction SilentlyContinue)) {
-            $ID = (Start-Process powershell -ArgumentList ("-Command " + $ScriptBlock) -PassThru).Id
+            $ID = (Start-Process powershell -ArgumentList "-NoExit -Command Invoke-Command -ScriptBlock {$ScriptBlock} -Argumentlist $Arg" -PassThru).Id
         }
     }
 }
