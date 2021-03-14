@@ -65,12 +65,14 @@ function Start-ChatClient {
     $Name = $Name.Replace('"', '').Replace("'", "")
 
     Clear-Host
-
-    Write-Host -Object "---------------------------Nachrichtenverlauf---------------------------"
+    Write-Host -Object "Suche Nach Lokalem Chat Server....."
 
     $IP = Start-LocalPortscan -Port 8998 | Where-Object -Property "Open" -Value $true -EQ | Select-Object -ExpandProperty "IPAddress" -First 1
     $Client = New-Object System.Net.Sockets.TcpClient $IP, $Port
     $Stream = $Client.GetStream()
+
+    Clear-Host
+    Write-Host -Object "---------------------------Nachrichtenverlauf---------------------------"
 
     $Prompt = "$Name> "
     $FilePath = Join-Path -Path	$env:TMP -ChildPath "/MSG.txt"
