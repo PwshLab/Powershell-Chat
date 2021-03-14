@@ -78,10 +78,11 @@ function Start-ChatClient {
     Write-Host -Object "---------------------------Nachrichtenverlauf---------------------------"
 
     $Prompt = "$Name> "
-    $FilePath = Join-Path -Path	$env:TMP -ChildPath "/MSG.txt"
-    $ScriptBlock = {Param($Prompt,$FilePath) ;[console]::WindowWidth=75; [console]::WindowHeight=20; Clear-Host; Write-Host -Object "---------Nachrichten-in-dieses-Fenster-Schreiben---------"; Write-Host -Object ("''"); while ($true) {Write-Host -Object $Prompt -NoNewline; $Host.UI.ReadLine() | Out-File -FilePath $FilePath}}
-    $Arg = "'$Prompt','$FilePath'"
-    $ID = (Start-Process powershell -ArgumentList "-NoExit -Command Invoke-Command -ScriptBlock {$ScriptBlock} -Argumentlist $Arg" -PassThru).Id
+    $FilePath = Join-Path -Path	$env:TMP -ChildPath "/"
+    $ScriptBlock = {Param($Prompt,$FilePath,$ParentId) ;$FilePath =  Join-Path -Path $FilePath -ChildPath "/$PID.txt"; [console]::WindowWidth=75; [console]::WindowHeight=20; Clear-Host; Write-Host -Object "---------Nachrichten-in-dieses-Fenster-Schreiben---------"; Write-Host -Object "$null"; while ((Get-Process -Id $ParentId -ErrorAction SilentlyContinue)) {Write-Host -Object $Prompt -NoNewline; $Host.UI.ReadLine() | Out-File -FilePath $FilePath}; Remove-Item -Path $FilePath -Force -ErrorAction SilentlyContinue}
+    $Arg = "'$Prompt','$FilePath','$PID'"
+    $ID = (Start-Process powershell -ArgumentList "-Command Invoke-Command -ScriptBlock {$ScriptBlock} -Argumentlist $Arg" -PassThru).Id
+    $FilePath = Join-Path -Path	$env:TMP -ChildPath "/$ID.txt"
 
     while ($Client.Connected) {
         if ($Stream.DataAvailable) {
@@ -90,7 +91,7 @@ function Start-ChatClient {
             $DataB = New-Object byte[] $Read
             $DataA[0..($Read-1)].CopyTo($DataB, 0)
             if ($DataB.Length -gt 0) {
-                $InMessage = [Text.Encoding]::ASCII.GetString($DataB)
+                $InMessage = [Text.Encoding]::Unicode.GetString($DataB)
                 $InMessageFull += $InMessage
                 $InMessage = $null
             }
@@ -105,13 +106,16 @@ function Start-ChatClient {
             Start-Sleep -Milliseconds 50
             $OutMessage = Get-Content -Path $FilePath
             Remove-Item -Path $FilePath -Force
-            $OutMessage = $OutMessage.Replace('"', '').Replace("'", "")
-            $OutMessage = "$Name> $OutMessage"
-            $Data = [Text.Encoding]::ASCII.GetBytes($OutMessage)
-            $Stream.Write($Data, 0, $Data.Length)
+            if ($OutMessage) {
+                $OutMessage = $OutMessage.Replace('"', '').Replace("'", "")
+                $OutMessage = "$Name> $OutMessage"
+                $Data = [Text.Encoding]::Unicode.GetBytes($OutMessage)
+                $Stream.Write($Data, 0, $Data.Length)
+            }
         }
         if (-not (Get-Process -Id $ID -ErrorAction SilentlyContinue)) {
-            $ID = (Start-Process powershell -ArgumentList "-NoExit -Command Invoke-Command -ScriptBlock {$ScriptBlock} -Argumentlist $Arg" -PassThru).Id
+            $ID = (Start-Process powershell -ArgumentList "-Command Invoke-Command -ScriptBlock {$ScriptBlock} -Argumentlist $Arg" -PassThru).Id
+            $FilePath = Join-Path -Path	$env:TMP -ChildPath "/$ID.txt"
         }
     }
 }
