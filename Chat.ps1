@@ -61,21 +61,21 @@ function Start-ChatClient {
         $Port = 8999
     )
 
-    $Name = Read-Host -Prompt "Nutzername "
+    $Name = Read-Host -Prompt "Username "
     $Name = $Name.Replace('"', '').Replace("'", "")
 
     Clear-Host
-    Write-Host -Object "Suche Nach Lokalem Chat Server....."
+    Write-Host -Object "Searching for local chat servers....."
 
     $IP = Start-LocalPortscan -Port 8998 | Where-Object -Property "Open" -Value $true -EQ | Select-Object -ExpandProperty "IPAddress" -First 1
 
-    if (-not $IP) {Write-Host -Object ""; Write-Host "Kein Server gefunden. Programm wird Beendet."; Start-Sleep -Seconds 2; Exit}
+    if (-not $IP) {Write-Host -Object ""; Write-Host "No servers found."; Start-Sleep -Seconds 2; Exit}
 
     $Client = New-Object System.Net.Sockets.TcpClient $IP, $Port
     $Stream = $Client.GetStream()
 
     Clear-Host
-    Write-Host -Object "---------------------------Nachrichtenverlauf---------------------------"
+    Write-Host -Object "---------------------------Message History---------------------------"
 
     $Prompt = "$Name> "
     $FilePath = Join-Path -Path	$env:TMP -ChildPath "/"
