@@ -58,7 +58,10 @@ function Start-ChatClient {
     param (
         [Parameter()]
         [Int64]
-        $Port = 8999
+        $Port = 8999,
+        [Parameter(Mandatory=$false)]
+        [String]
+        $IP
     )
 
     $Name = Read-Host -Prompt "Username "
@@ -66,8 +69,8 @@ function Start-ChatClient {
 
     Clear-Host
     Write-Host -Object "Searching for local chat servers....."
-
-    $IP = Start-LocalPortscan -Port 8998 | Where-Object -Property "Open" -Value $true -EQ | Select-Object -ExpandProperty "IPAddress" -First 1
+    
+    if (-not $IP) {$IP = Start-LocalPortscan -Port 8998 | Where-Object -Property "Open" -Value $true -EQ | Select-Object -ExpandProperty "IPAddress" -First 1}
 
     if (-not $IP) {Write-Host -Object ""; Write-Host "No servers found."; Start-Sleep -Seconds 2; Exit}
 
