@@ -74,11 +74,14 @@ function Start-ChatClient {
         $IP = Start-LocalPortscan -Port 8998 | Where-Object -Property "Open" -Value $true -EQ | Select-Object -ExpandProperty "IPAddress" -First 1
         
         if (-not $IP) {Write-Host -Object ""; Write-Host "No servers found."; Start-Sleep -Seconds 2; Exit}
-    } else {
-        Write-Host -Object "Connecting to chat server....."
     }
+    
+    Write-Host -Object "Connecting to chat server....."
 
     $Client = New-Object System.Net.Sockets.TcpClient $IP, $Port
+    
+    if ((-not $Client) -or (-not $Client.Connected)) {Write-Host -Object ""; Write-Host "Connection failed."; Start-Sleep -Seconds 2; Exit}
+    
     $Stream = $Client.GetStream()
 
     Clear-Host
