@@ -68,11 +68,15 @@ function Start-ChatClient {
     $Name = $Name.Replace('"', '').Replace("'", "")
 
     Clear-Host
-    Write-Host -Object "Searching for local chat servers....."
     
-    if (-not $IP) {$IP = Start-LocalPortscan -Port 8998 | Where-Object -Property "Open" -Value $true -EQ | Select-Object -ExpandProperty "IPAddress" -First 1}
-
-    if (-not $IP) {Write-Host -Object ""; Write-Host "No servers found."; Start-Sleep -Seconds 2; Exit}
+    if (-not $IP) {
+        Write-Host -Object "Searching for local chat servers....."
+        $IP = Start-LocalPortscan -Port 8998 | Where-Object -Property "Open" -Value $true -EQ | Select-Object -ExpandProperty "IPAddress" -First 1
+        
+        if (-not $IP) {Write-Host -Object ""; Write-Host "No servers found."; Start-Sleep -Seconds 2; Exit}
+    } else {
+        Write-Host -Object "Connecting to chat server....."
+    }
 
     $Client = New-Object System.Net.Sockets.TcpClient $IP, $Port
     $Stream = $Client.GetStream()
